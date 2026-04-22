@@ -54,6 +54,8 @@ AlphaFold3 is a multi-stage structure prediction system. The pipeline is split i
 
 ## Development Commands
 
+**Python version:** AF3 requires Python ≥3.12 (see `pyproject.toml`)
+
 ```bash
 # Pre-flight checks (always first)
 bash ~/repos/build-lib/preflight/surface_all.sh .
@@ -61,24 +63,39 @@ bash ~/repos/build-lib/preflight/surface_all.sh .
 # Install in editable mode (builds C++ extensions via scikit-build-core)
 pip install -e .
 
+# Install with test dependencies
+pip install -e ".[dev]"
+
 # Build without installing (for development)
 pip install -e . --no-build-isolation --verbose
 
-# Run all tests
-python -m pytest src/alphafold3/ -v
+# Build intermediate data (chemical component pickles for constants)
+build_data
 
-# Run a specific test file
-python -m pytest src/alphafold3/common/testing/test_*.py -v
-
-# Run tests matching a pattern
-python -m pytest src/alphafold3/ -k "test_msa" -v
-
-# Run the integration test (end-to-end pipeline)
+# Run integration tests (end-to-end pipeline)
+# Uses absltest framework (from absl-py); run directly with Python
 python run_alphafold_test.py
 
 # Run data pipeline tests only
 python run_alphafold_data_test.py
+
+# Run tests with verbose output
+python run_alphafold_test.py --alsologtostderr --v=2
+
+# Run a specific test case
+python run_alphafold_test.py AlphaFoldTest.test_case_name
 ```
+
+## Testing Framework
+
+AF3 uses **absltest** (Google's testing framework from `absl-py`), not pytest. The main test suites are:
+
+- `run_alphafold_test.py` — Full integration test (end-to-end pipeline with model inference). Requires GPU, model weights, and all databases. Runs the complete structure prediction workflow.
+- `run_alphafold_data_test.py` — Data pipeline tests (featurization, MSA, template search). Can run on CPU but requires HMMER binaries (jackhmmer, hmmsearch, etc.).
+
+Both test files use `absltest` and are run directly with Python, not via pytest. Tests use temporary directories managed by the test framework (accessible via `absltest.TEST_TMPDIR`).
+
+**Note:** These are large integration tests. For rapid iteration on specific modules, write unit tests inline using Python's `unittest` framework.
 
 ## Running Structure Predictions
 
@@ -126,12 +143,19 @@ AF3 uses **scikit-build-core** to integrate CMake with Python packaging. The bui
 1. CMake fetches C++ dependencies (abseil, pybind11, libcifpp, DSSP, etc.)
 2. Compiles C++ extensions (`alphafold3.cpp` bindings for structure I/O, secondary structure)
 3. Python packaging wraps the compiled `.so` files
+4. Post-install: `build_data` generates chemical component pickles from libcifpp data
 
-**Build troubleshooting:**
-- C++ builds require: cmake ≥3.28, ninja, C++20 compiler
-- macOS: may need `xcode-select --install`
+**Build requirements:**
+- Python ≥3.12
+- cmake ≥3.28, ninja, C++20 compiler
+- macOS: `xcode-select --install`
 - Linux: `apt-get install cmake ninja-build`
-- If build fails, check `CMakeLists.txt` git config workaround (line 15 — FetchContent Git issue)
+- HMMER suite (jackhmmer, hmmsearch, hmmalign, hmmbuild) for data pipeline tests
+
+**Troubleshooting:**
+- If build fails, check `CMakeLists.txt` line 15 — FetchContent Git config workaround (fixed in recent CMake)
+- `build_data` requires `LIBCIFPP_DATA_DIR` or searches standard install paths for `libcifpp/components.cif`
+- Force rebuild: `pip install -e . --no-cache-dir --force-reinstall`
 
 ## RESYNANT Integration
 
@@ -162,22 +186,35 @@ AF3 can feed predictions to shift prediction pipelines (shiftx4proteins, quantum
 - **Atom Identity:** [`governance/contracts/ATOM_IDENTITY_CONTRACT.md`](../governance/contracts/ATOM_IDENTITY_CONTRACT.md)
 - **Build Protocols:** [`build-lib/docs/BUILD_PROTOCOLS.md`](../build-lib/docs/BUILD_PROTOCOLS.md)
 
-## Debugging
+## Development Patterns
 
-**JAX/GPU issues:**
+**Rapid iteration:** For quick testing of individual modules (e.g., featurization, scoring), use `--run_inference=false` or `--run_data_pipeline=false` to skip expensive stages.
+
+**Debugging data pipeline:** Enable logging with `--alsologtostderr --v=2` when running tests or predictions to see detailed messages from the data pipeline stages (MSA, templates, featurization).
+
+**JAX/GPU development:**
 - JAX installation is finicky; follow [`docs/installation.md`](docs/installation.md)
-- Verify GPU with: `python -c "import jax; print(jax.devices())"`
-- Set `JAX_PLATFORMS=cpu` to force CPU-only testing
+- Verify GPU: `python -c "import jax; print(jax.devices())"`
+- Force CPU-only: `JAX_PLATFORMS=cpu`
+- Profile GPU memory: set `JAX_CHECK_TRACER_LEAKS=1` to catch traced values leaking
 
-**Memory issues (data pipeline):**
-- Genetic search is RAM-intensive; 64 GB recommended for long targets
-- `--run_data_pipeline=false` skips this stage for quick inference testing
-- Features are cached; reuse in `--run_inference=false` mode to avoid re-searching
+**Memory management:**
+- Genetic search (data pipeline) requires ~64 GB RAM for long protein sequences
+- Use `--run_data_pipeline=false` for quick inference-only testing
+- Features cache during `--run_inference=false` mode; reuse cached features to avoid re-searching
 
 **C++ compilation issues:**
-- Check CMake generator: `cmake --build . -v` shows actual compile commands
-- libcifpp/DSSP may fail on macOS (FetchContent issues resolved by git config workaround in CMakeLists.txt)
-- Force rebuild: `pip install -e . --no-cache-dir --force-reinstall`
+- Check actual compile commands: `cmake --build . -v`
+- FetchContent Git issues on newer Git: Fixed by `GIT_CONFIG_PARAMETERS` in CMakeLists.txt line 15
+- libcifpp/DSSP may fail on some systems; check `LIBCIFPP_DATA_DIR` environment variable for `build_data`
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for submission guidelines. Key points:
+- Small patches (bug fixes, documentation) are welcome
+- AI-generated code must be transparently labeled, reviewed, and tested
+- All contributions require Contributor License Agreement (CLA)
+- PRs require manual review
 
 ## Resources
 
