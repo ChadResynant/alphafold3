@@ -6,6 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a clone of [`google-deepmind/alphafold3`](https://github.com/google-deepmind/alphafold3) (upstream: origin), mirrored to Falcon RAID (lan remote).
 
+## Governance Prerequisite (Non-Negotiable)
+
+**Before any work in this repository, read and comply with:** [`~/repos/governance/INDEX.md`](../governance/INDEX.md)
+
+All cross-repo contracts, policies, and enforcement gates in `~/repos/governance/` are binding. Repo-specific rules below may extend but never override governance contracts.
+
+
 ## Governance
 
 **Before any work:** read [`~/repos/governance/INDEX.md`](../governance/INDEX.md)
