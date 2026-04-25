@@ -5,6 +5,9 @@ geometry-readiness audit/export on that output.
 
 Current status: `BLOCKED_AF3_RUNTIME_PREREQUISITES_ABSENT`.
 
+See [AF3_RUNTIME_UNBLOCK_CHECKLIST.md](AF3_RUNTIME_UNBLOCK_CHECKLIST.md)
+for the one-page “proper machine” checklist to get to one real golden-path run.
+
 ## What Was Checked
 
 - Active Python is `/Users/chad/.pyenv/shims/python`, version `3.11.7`.
