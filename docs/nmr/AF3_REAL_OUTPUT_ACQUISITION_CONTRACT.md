@@ -56,6 +56,32 @@ Acquire enough real AF3 outputs to support cohort-level interpretation:
 The smallest useful unblocker is five real AF3 output directories. Fewer than
 five real outputs is a no-go for scientific interpretation.
 
+## High-Information 5-10 System Cohort
+
+Start with a deliberately mixed, operationally small cohort. Do not use huge
+systems first; the first real survey should optimize interpretability rather
+than stress-testing runtime.
+
+| Slot | System class | Purpose |
+| --- | --- | --- |
+| 1 | small rigid monomer | near-duplicate baseline |
+| 2 | medium globular monomer | typical AF3 behavior |
+| 3 | flexible or disordered-region protein | local diversity and confidence coupling |
+| 4 | multidomain protein | inter-domain uncertainty and PAE relevance |
+| 5 | homodimer or small oligomer | chain identity stability and interface diversity |
+| 6 | heteromeric complex | chain identity and interface behavior |
+| 7 | protein-ligand system, if supported | ligand-contact geometry completeness |
+| 8 | protein-DNA or protein-RNA system, if supported | mixed-polymer atom identity |
+| 9 | aromatic-rich protein or binding pocket | ring orientation diversity |
+| 10 | methyl/sidechain-packed hydrophobic core | sidechain microstate diversity |
+
+Minimum acceptance for each acquired system:
+
+- at least 3 ranked models
+- per-rank model CIF files present
+- per-rank confidence JSON files present
+- summary confidence JSON present when AF3 emits it
+
 ## Required Metadata
 
 For each system, record an operator manifest row with:
