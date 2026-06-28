@@ -1,5 +1,20 @@
 # CLAUDE.md
 
+
+<!-- GOVERNANCE-PREFLIGHT-v1 -->
+## Governance Pre-Flight (summary — binding rules live in governance/)
+
+All agents — Claude, Codex, Grok, Gemini, Hermes — before starting a task:
+- Complete the startup audit and the **PHASE 0.5 pre-flight restatement**: restate to the
+  user a 3–5 step plan plus the three most relevant governance policies, before doing the work.
+- Use the **canonical document template** for any document — do not invent a format.
+
+This is a summary; the binding rules and full checklists live in governance (source of truth):
+- `~/repos/governance/policies/AGENT_INTERACTION_POLICY.md` — startup sequence + PHASE 0.5
+- `~/repos/governance/standards/DOCUMENT_TEMPLATE_REGISTRY.md` — which template to use
+- `~/repos/governance/INDEX.md` — master registry of all contracts, policies, gates
+<!-- /GOVERNANCE-PREFLIGHT-v1 -->
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 **AlphaFold3** — Protein structure prediction from Google DeepMind.
